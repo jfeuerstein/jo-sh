@@ -139,9 +139,9 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <pre className="app-logo" onClick={handleLogoClick}>
-┌────────────────────┐
-│   jo-sh daily      │
-│   ▓▓▓░░░░░         │
+┌────────────────────┐<br />
+│   jo-sh daily      │<br />
+│   ▓▓▓░░░░░         │<br />
 └────────────────────┘
           </pre>
           {showEasterEgg && (

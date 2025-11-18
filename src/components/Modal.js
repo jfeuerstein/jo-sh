@@ -27,8 +27,8 @@ function Modal({ isOpen, onClose, children, title }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         {title && (
           <pre className="modal-header">
-┌{'─'.repeat(borderLength)}┐
-│ {title}{' '.repeat(borderLength - title.length - 2)} │
+┌{'─'.repeat(borderLength)}┐<br />
+│ {title}{' '.repeat(borderLength - title.length - 2)} │<br />
 └{'─'.repeat(borderLength)}┘
           </pre>
         )}
