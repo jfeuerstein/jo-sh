@@ -1,0 +1,58 @@
+.btn {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  font-family: 'Courier New', monospace;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: lowercase;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variant: Delete/Destructive */
+.btn-delete:hover:not(:disabled) {
+  color: var(--color-error);
+  border-color: var(--color-error);
+  background: transparent;
+}
+
+/* Variant: Save/Success */
+.btn-save:hover:not(:disabled) {
+  color: var(--color-success);
+  border-color: var(--color-success);
+  background: transparent;
+}
+
+/* Variant: Primary (inverted by default) */
+.btn-primary {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+/* Variant: Small */
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: var(--text-xs);
+}
