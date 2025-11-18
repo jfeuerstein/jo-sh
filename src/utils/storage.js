@@ -6,6 +6,8 @@ import {
   saveTasksToFirestore,
   loadDailyDataFromFirestore,
   saveDailyDataToFirestore,
+  loadStreaksFromFirestore,
+  saveStreaksToFirestore,
 } from '../services/firebaseService';
 
 const STORAGE_KEYS = {
@@ -94,7 +96,12 @@ export const saveTodayData = async (completedTasks, totalPoints, userId = null) 
 };
 
 // Streak Management
-export const loadStreaks = () => {
+export const loadStreaks = async (userId = null) => {
+  if (userId) {
+    return await loadStreaksFromFirestore(userId);
+  }
+
+  // Fallback to localStorage
   try {
     const streaks = localStorage.getItem(STORAGE_KEYS.STREAKS);
     return streaks ? JSON.parse(streaks) : { current: 0, best: 0, lastCompletionDate: null };
@@ -104,7 +111,13 @@ export const loadStreaks = () => {
   }
 };
 
-export const saveStreaks = (streaks) => {
+export const saveStreaks = async (streaks, userId = null) => {
+  if (userId) {
+    await saveStreaksToFirestore(userId, streaks);
+    return;
+  }
+
+  // Fallback to localStorage
   try {
     localStorage.setItem(STORAGE_KEYS.STREAKS, JSON.stringify(streaks));
   } catch (error) {
@@ -118,13 +131,18 @@ export const calculateStreak = async (userId = null) => {
   const dates = Object.keys(dailyData).sort().reverse();
 
   if (dates.length === 0) {
-    return { current: 0, best: 0 };
+    const streaks = { current: 0, best: 0, lastCompletionDate: null };
+    if (userId) {
+      await saveStreaks(streaks, userId);
+    }
+    return streaks;
   }
 
   let currentStreak = 0;
   let bestStreak = 0;
   let tempStreak = 0;
   let expectedDate = new Date();
+  let lastCompletionDate = null;
 
   // Calculate current streak (from today backwards)
   for (let i = 0; i < dates.length; i++) {
@@ -134,6 +152,10 @@ export const calculateStreak = async (userId = null) => {
 
     // Check if tasks were completed on this date
     if (dailyData[currentDateStr].completed.length > 0) {
+      if (!lastCompletionDate) {
+        lastCompletionDate = currentDateStr;
+      }
+
       if (currentDateStr === expectedDateStr) {
         if (i === 0 || currentDateStr === getTodayString()) {
           currentStreak++;
@@ -152,7 +174,18 @@ export const calculateStreak = async (userId = null) => {
     }
   }
 
-  return { current: currentStreak, best: bestStreak };
+  const streaks = {
+    current: currentStreak,
+    best: bestStreak,
+    lastCompletionDate,
+  };
+
+  // Save calculated streaks to Firebase
+  if (userId) {
+    await saveStreaks(streaks, userId);
+  }
+
+  return streaks;
 };
 
 // Generate default task templates

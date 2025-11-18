@@ -6,11 +6,13 @@ A minimalist daily todo app with the josh-thetic design philosophy. Track your t
 
 - **User Authentication**: Secure login and signup with Firebase Authentication
 - **Cloud Sync**: Your tasks and progress sync across devices with Firestore
+- **Task Persistence**: Tasks you create persist across sessions and devices until deleted
 - **Task Management**: Create, edit, and complete daily tasks with point values
-- **Streak Tracking**: Build and maintain your completion streaks
+- **Streak Tracking**: Build and maintain your completion streaks (synced to Firebase)
 - **Progress Calendar**: Visual calendar showing your daily achievements
 - **Follow-up Questions**: Reflect on completed tasks with custom follow-ups
 - **Celebrations**: Celebrate milestones and achievements
+- **Usage Analytics**: Track app usage, task completion history, and session data
 - **Multi-user Support**: Each user has their own private data
 
 ## Quick Start
@@ -39,6 +41,41 @@ npm start
 
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+## Data Persistence
+
+All user data is automatically saved to Firebase Firestore and syncs across devices:
+
+### What's Saved to Firebase
+
+1. **Tasks** (`users/{userId}/data/tasks`)
+   - Task definitions with points and follow-up questions
+   - Persists across sessions and devices until manually deleted
+   - Automatically syncs when you create, edit, or delete tasks
+
+2. **Daily Completion Data** (`users/{userId}/data/dailyData`)
+   - Completed tasks for each day (with timestamps)
+   - Follow-up responses for each completed task
+   - Daily point totals
+   - Full completion history
+
+3. **Streaks** (`users/{userId}/data/streaks`)
+   - Current streak count
+   - Best streak achieved
+   - Last completion date
+
+4. **Usage Analytics** (`users/{userId}/data/usage`)
+   - Session tracking (login/logout times)
+   - Task interaction events (created, edited, deleted, completed)
+   - Celebration milestones
+   - App usage statistics
+
+### Cross-Device Sync
+
+When you log in from any device, your data is automatically loaded:
+- Tasks you created on one device appear on all devices
+- Completion history and streaks stay in sync
+- Progress is preserved across sessions
+
 ## Project Structure
 
 ```
@@ -50,9 +87,10 @@ src/
 ├── contexts/         # React context providers
 │   └── AuthContext.js # Authentication state management
 ├── services/         # External service integrations
-│   └── firebaseService.js # Firestore operations
+│   └── firebaseService.js # Firestore operations & usage tracking
 ├── utils/            # Utility functions
-│   ├── storage.js    # Data persistence
+│   ├── storage.js    # Data persistence abstraction
+│   ├── usageTracking.js # User analytics tracking
 │   └── celebrations.js # Achievement logic
 └── config/           # Configuration
     └── firebase.js   # Firebase initialization
