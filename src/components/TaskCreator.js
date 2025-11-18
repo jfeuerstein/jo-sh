@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import Input from './Input';
@@ -8,6 +8,19 @@ function TaskCreator({ isOpen, onClose, onSave, editTask = null }) {
   const [taskName, setTaskName] = useState(editTask?.name || '');
   const [points, setPoints] = useState(editTask?.points || 10);
   const [followUps, setFollowUps] = useState(editTask?.followUps || []);
+
+  // Sync form state when editTask prop changes
+  useEffect(() => {
+    if (editTask) {
+      setTaskName(editTask.name || '');
+      setPoints(editTask.points || 10);
+      setFollowUps(editTask.followUps || []);
+    } else {
+      setTaskName('');
+      setPoints(10);
+      setFollowUps([]);
+    }
+  }, [editTask]);
 
   const handleAddFollowUp = (type) => {
     const newFollowUp = {
