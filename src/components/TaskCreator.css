@@ -1,0 +1,123 @@
+.task-creator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.follow-ups-section {
+  border: 1px solid var(--border-primary);
+  padding: var(--space-sm);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.section-label {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-transform: lowercase;
+}
+
+.follow-up-item {
+  border: 1px solid var(--border-primary);
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-hover);
+}
+
+.follow-up-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.follow-up-type {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  text-transform: lowercase;
+}
+
+.category-options {
+  margin-top: var(--space-sm);
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.category-chip {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+}
+
+.category-remove {
+  background: transparent;
+  border: none;
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: var(--text-base);
+  padding: 0;
+  line-height: 1;
+}
+
+.category-add {
+  margin-top: var(--space-xs);
+}
+
+.category-input {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  margin-top: var(--space-sm);
+}
+
+.checkbox-label input[type='checkbox'] {
+  cursor: pointer;
+}
+
+.add-follow-up-buttons {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-primary);
+}
+
+@media (max-width: 768px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .add-follow-up-buttons {
+    flex-direction: column;
+  }
+}
