@@ -12,9 +12,9 @@ function TaskList({ tasks, completedTasks, onComplete, onEdit, onDelete }) {
       {tasks.length === 0 ? (
         <div className="empty-state">
           <pre className="ascii-empty">
-┌─────────────────────┐
-│  no tasks yet...    │
-│  create one below!  │
+┌─────────────────────┐<br />
+│  no tasks yet...    │<br />
+│  create one below!  │<br />
 └─────────────────────┘
           </pre>
         </div>

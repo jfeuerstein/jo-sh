@@ -57,7 +57,7 @@
 }
 
 .easter-egg pre {
-  color: var(--color-success);
+  color: var(--color-error);
   font-size: var(--text-xs);
   line-height: 1.2;
   margin: 0;

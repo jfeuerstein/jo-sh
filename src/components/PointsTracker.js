@@ -5,7 +5,7 @@ function PointsTracker({ tasks, completedTasks }) {
   const [showSecret, setShowSecret] = useState(false);
   const [hoverTimer, setHoverTimer] = useState(null);
 
-  const totalPoints = tasks.reduce((sum, task) => sum + task.points, 0);
+  const totalPoints = 10;
   const earnedPoints = completedTasks.reduce((sum, ct) => {
     const task = tasks.find(t => t.id === ct.taskId);
     return sum + (task?.points || 0);

@@ -79,9 +79,9 @@ const Login = () => {
       <div className="login-box">
         <div className="login-header">
           <pre className="login-logo">
-┌────────────────────┐
-│   jo-sh daily      │
-│   ▓▓▓░░░░░         │
+┌────────────────────┐<br />
+│   jo-sh daily      │<br />
+│   ▓▓▓░░░░░         │<br />
 └────────────────────┘
           </pre>
           <h2 className="login-title">{isSignUp ? 'create account' : 'welcome back'}</h2>

@@ -225,9 +225,7 @@ function App() {
           {showEasterEgg && (
             <div className="easter-egg">
               <pre>
-you found the secret!
-  keep being awesome
-    ✨
+stop clicking me
               </pre>
             </div>
           )}
