@@ -8,6 +8,8 @@ import StreakTracker from './components/StreakTracker';
 import Calendar from './components/Calendar';
 import CelebrationModal from './components/CelebrationModal';
 import Button from './components/Button';
+import Login from './components/Login';
+import { useAuth } from './contexts/AuthContext';
 import {
   loadTasks,
   saveTasks,
@@ -19,6 +21,7 @@ import {
 import { checkForCelebrations } from './utils/celebrations';
 
 function App() {
+  const { currentUser, logout } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
@@ -28,40 +31,76 @@ function App() {
   const [streaks, setStreaks] = useState({ current: 0, best: 0 });
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load tasks and completed tasks on mount
+  // Load tasks and completed tasks on mount or when user changes
   useEffect(() => {
-    const loadedTasks = loadTasks();
-    const todayData = getTodayData();
-    setTasks(loadedTasks);
-    setCompletedTasks(todayData.completed || []);
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
 
-    // Calculate streaks
-    const calculatedStreaks = calculateStreak();
-    setStreaks(calculatedStreaks);
-  }, []);
+    const loadData = async () => {
+      try {
+        const loadedTasks = await loadTasks(currentUser.uid);
+        const todayData = await getTodayData(currentUser.uid);
+        setTasks(loadedTasks);
+        setCompletedTasks(todayData.completed || []);
+
+        // Calculate streaks
+        const calculatedStreaks = await calculateStreak(currentUser.uid);
+        setStreaks(calculatedStreaks);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [currentUser]);
 
   // Save tasks whenever they change
   useEffect(() => {
-    if (tasks.length > 0) {
-      saveTasks(tasks);
-    }
-  }, [tasks]);
+    if (!currentUser || loading) return;
+
+    const saveData = async () => {
+      try {
+        if (tasks.length >= 0) {
+          await saveTasks(tasks, currentUser.uid);
+        }
+      } catch (error) {
+        console.error('Error saving tasks:', error);
+      }
+    };
+
+    saveData();
+  }, [tasks, currentUser, loading]);
 
   // Save completed tasks whenever they change
   useEffect(() => {
-    const totalPoints = completedTasks.reduce((sum, ct) => {
-      const task = tasks.find((t) => t.id === ct.taskId);
-      return sum + (task?.points || 0);
-    }, 0);
-    saveTodayData(completedTasks, totalPoints);
+    if (!currentUser || loading) return;
 
-    // Recalculate streaks when tasks are completed
-    if (completedTasks.length > 0) {
-      const calculatedStreaks = calculateStreak();
-      setStreaks(calculatedStreaks);
-    }
-  }, [completedTasks, tasks]);
+    const saveData = async () => {
+      try {
+        const totalPoints = completedTasks.reduce((sum, ct) => {
+          const task = tasks.find((t) => t.id === ct.taskId);
+          return sum + (task?.points || 0);
+        }, 0);
+        await saveTodayData(completedTasks, totalPoints, currentUser.uid);
+
+        // Recalculate streaks when tasks are completed
+        if (completedTasks.length > 0) {
+          const calculatedStreaks = await calculateStreak(currentUser.uid);
+          setStreaks(calculatedStreaks);
+        }
+      } catch (error) {
+        console.error('Error saving completed tasks:', error);
+      }
+    };
+
+    saveData();
+  }, [completedTasks, tasks, currentUser, loading]);
 
   const handleSaveTask = (task) => {
     if (editingTask) {
@@ -92,7 +131,7 @@ function App() {
     setFollowUpTask(task);
   };
 
-  const handleFollowUpComplete = (responses) => {
+  const handleFollowUpComplete = async (responses) => {
     const newCompletedTask = {
       taskId: followUpTask.id,
       completedAt: new Date().toISOString(),
@@ -104,22 +143,26 @@ function App() {
     setFollowUpTask(null);
 
     // Check for celebrations
-    const dailyData = loadDailyData();
-    const newStreaks = calculateStreak();
-    const celebrations = checkForCelebrations(
-      newCompletedTasks,
-      tasks,
-      newStreaks.current,
-      newStreaks.best,
-      dailyData
-    );
+    try {
+      const dailyData = await loadDailyData(currentUser?.uid);
+      const newStreaks = await calculateStreak(currentUser?.uid);
+      const celebrations = checkForCelebrations(
+        newCompletedTasks,
+        tasks,
+        newStreaks.current,
+        newStreaks.best,
+        dailyData
+      );
 
-    // Show first celebration if any
-    if (celebrations.length > 0) {
-      setCelebration({
-        type: celebrations[0].type,
-        data: celebrations[0].data,
-      });
+      // Show first celebration if any
+      if (celebrations.length > 0) {
+        setCelebration({
+          type: celebrations[0].type,
+          data: celebrations[0].data,
+        });
+      }
+    } catch (error) {
+      console.error('Error checking celebrations:', error);
     }
   };
 
@@ -134,16 +177,51 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setTasks([]);
+      setCompletedTasks([]);
+      setStreaks({ current: 0, best: 0 });
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  // Show login screen if not authenticated
+  if (!currentUser) {
+    return <Login />;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="app">
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <p>loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <pre className="app-logo" onClick={handleLogoClick}>
+          <div className="header-top">
+            <pre className="app-logo" onClick={handleLogoClick}>
 ┌────────────────────┐<br />
 │   jo-sh daily      │<br />
 │   ▓▓▓░░░░░         │<br />
 └────────────────────┘
-          </pre>
+            </pre>
+            <div className="header-actions">
+              <span className="user-email">{currentUser.email}</span>
+              <Button variant="secondary" onClick={handleLogout}>
+                logout
+              </Button>
+            </div>
+          </div>
           {showEasterEgg && (
             <div className="easter-egg">
               <pre>
