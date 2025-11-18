@@ -1,3 +1,72 @@
+# jo-sh daily
+
+A minimalist daily todo app with the josh-thetic design philosophy. Track your tasks, build streaks, and celebrate your wins - all with Firebase authentication and cloud sync.
+
+## Features
+
+- **User Authentication**: Secure login and signup with Firebase Authentication
+- **Cloud Sync**: Your tasks and progress sync across devices with Firestore
+- **Task Management**: Create, edit, and complete daily tasks with point values
+- **Streak Tracking**: Build and maintain your completion streaks
+- **Progress Calendar**: Visual calendar showing your daily achievements
+- **Follow-up Questions**: Reflect on completed tasks with custom follow-ups
+- **Celebrations**: Celebrate milestones and achievements
+- **Multi-user Support**: Each user has their own private data
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up Firebase
+
+Before running the app, you need to set up Firebase. Follow the detailed instructions in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md).
+
+Quick steps:
+1. Create a Firebase project at https://console.firebase.google.com/
+2. Enable Email/Password authentication
+3. Create a Firestore database
+4. Copy `.env.example` to `.env` and add your Firebase credentials
+
+### 3. Run the App
+
+```bash
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+## Project Structure
+
+```
+src/
+├── components/        # React components
+│   ├── Login.js      # Authentication UI
+│   ├── TaskList.js   # Task display
+│   └── ...
+├── contexts/         # React context providers
+│   └── AuthContext.js # Authentication state management
+├── services/         # External service integrations
+│   └── firebaseService.js # Firestore operations
+├── utils/            # Utility functions
+│   ├── storage.js    # Data persistence
+│   └── celebrations.js # Achievement logic
+└── config/           # Configuration
+    └── firebase.js   # Firebase initialization
+```
+
+## Technologies
+
+- **React** - UI framework
+- **Firebase Authentication** - User authentication
+- **Cloud Firestore** - NoSQL database for task storage
+- **Create React App** - Build tooling
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

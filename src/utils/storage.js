@@ -1,4 +1,12 @@
-// localStorage utilities for the daily todo app
+// Storage utilities for the daily todo app
+// Uses Firestore for authenticated users, localStorage as fallback
+
+import {
+  loadTasksFromFirestore,
+  saveTasksToFirestore,
+  loadDailyDataFromFirestore,
+  saveDailyDataToFirestore,
+} from '../services/firebaseService';
 
 const STORAGE_KEYS = {
   TASKS: 'joshTodoTasks',
@@ -13,7 +21,12 @@ export const getTodayString = () => {
 };
 
 // Task Management
-export const loadTasks = () => {
+export const loadTasks = async (userId = null) => {
+  if (userId) {
+    return await loadTasksFromFirestore(userId);
+  }
+
+  // Fallback to localStorage
   try {
     const tasks = localStorage.getItem(STORAGE_KEYS.TASKS);
     return tasks ? JSON.parse(tasks) : [];
@@ -23,7 +36,13 @@ export const loadTasks = () => {
   }
 };
 
-export const saveTasks = (tasks) => {
+export const saveTasks = async (tasks, userId = null) => {
+  if (userId) {
+    await saveTasksToFirestore(userId, tasks);
+    return;
+  }
+
+  // Fallback to localStorage
   try {
     localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
   } catch (error) {
@@ -32,7 +51,12 @@ export const saveTasks = (tasks) => {
 };
 
 // Daily Data Management (tracks completion per day)
-export const loadDailyData = () => {
+export const loadDailyData = async (userId = null) => {
+  if (userId) {
+    return await loadDailyDataFromFirestore(userId);
+  }
+
+  // Fallback to localStorage
   try {
     const data = localStorage.getItem(STORAGE_KEYS.DAILY_DATA);
     return data ? JSON.parse(data) : {};
@@ -42,7 +66,13 @@ export const loadDailyData = () => {
   }
 };
 
-export const saveDailyData = (dailyData) => {
+export const saveDailyData = async (dailyData, userId = null) => {
+  if (userId) {
+    await saveDailyDataToFirestore(userId, dailyData);
+    return;
+  }
+
+  // Fallback to localStorage
   try {
     localStorage.setItem(STORAGE_KEYS.DAILY_DATA, JSON.stringify(dailyData));
   } catch (error) {
@@ -50,17 +80,17 @@ export const saveDailyData = (dailyData) => {
   }
 };
 
-export const getTodayData = () => {
-  const dailyData = loadDailyData();
+export const getTodayData = async (userId = null) => {
+  const dailyData = await loadDailyData(userId);
   const today = getTodayString();
   return dailyData[today] || { completed: [], totalPoints: 0 };
 };
 
-export const saveTodayData = (completedTasks, totalPoints) => {
-  const dailyData = loadDailyData();
+export const saveTodayData = async (completedTasks, totalPoints, userId = null) => {
+  const dailyData = await loadDailyData(userId);
   const today = getTodayString();
   dailyData[today] = { completed: completedTasks, totalPoints };
-  saveDailyData(dailyData);
+  await saveDailyData(dailyData, userId);
 };
 
 // Streak Management
@@ -83,8 +113,8 @@ export const saveStreaks = (streaks) => {
 };
 
 // Calculate streak based on daily data
-export const calculateStreak = () => {
-  const dailyData = loadDailyData();
+export const calculateStreak = async (userId = null) => {
+  const dailyData = await loadDailyData(userId);
   const dates = Object.keys(dailyData).sort().reverse();
 
   if (dates.length === 0) {

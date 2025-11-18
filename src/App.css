@@ -16,6 +16,25 @@
   position: relative;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.user-email {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-transform: lowercase;
+}
+
 .app-logo {
   color: var(--text-primary);
   font-size: var(--text-sm);
@@ -102,6 +121,16 @@
 @media (max-width: 768px) {
   .app-main {
     padding: var(--space-md) var(--space-sm);
+  }
+
+  .header-top {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .section-header {
