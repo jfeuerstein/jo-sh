@@ -210,9 +210,9 @@ function App() {
         <div className="header-content">
           <div className="header-top">
             <pre className="app-logo" onClick={handleLogoClick}>
-┌────────────────────┐
-│   jo-sh daily      │
-│   ▓▓▓░░░░░         │
+┌────────────────────┐<br />
+│   jo-sh daily      │<br />
+│   ▓▓▓░░░░░         │<br />
 └────────────────────┘
             </pre>
             <div className="header-actions">
