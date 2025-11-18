@@ -19,6 +19,15 @@ import {
   loadDailyData,
 } from './utils/storage';
 import { checkForCelebrations } from './utils/celebrations';
+import {
+  startSession,
+  endSession,
+  trackTaskCreated,
+  trackTaskEdited,
+  trackTaskDeleted,
+  trackTaskCompleted,
+  trackCelebration,
+} from './utils/usageTracking';
 
 function App() {
   const { currentUser, logout } = useAuth();
@@ -42,6 +51,9 @@ function App() {
 
     const loadData = async () => {
       try {
+        // Start session and track login
+        await startSession(currentUser.uid);
+
         const loadedTasks = await loadTasks(currentUser.uid);
         const todayData = await getTodayData(currentUser.uid);
         setTasks(loadedTasks);
@@ -58,6 +70,13 @@ function App() {
     };
 
     loadData();
+
+    // Setup cleanup for session on component unmount
+    return () => {
+      if (currentUser) {
+        endSession(currentUser.uid);
+      }
+    };
   }, [currentUser]);
 
   // Save tasks whenever they change
@@ -102,14 +121,18 @@ function App() {
     saveData();
   }, [completedTasks, tasks, currentUser, loading]);
 
-  const handleSaveTask = (task) => {
+  const handleSaveTask = async (task) => {
     if (editingTask) {
       // Update existing task
       setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
       setEditingTask(null);
+      // Track task edit
+      await trackTaskEdited(currentUser?.uid, task);
     } else {
       // Add new task
       setTasks([...tasks, task]);
+      // Track task creation
+      await trackTaskCreated(currentUser?.uid, task);
     }
     setIsCreatorOpen(false);
   };
@@ -119,11 +142,13 @@ function App() {
     setIsCreatorOpen(true);
   };
 
-  const handleDeleteTask = (taskId) => {
+  const handleDeleteTask = async (taskId) => {
     if (window.confirm('are you sure you want to delete this task?')) {
       setTasks(tasks.filter((t) => t.id !== taskId));
       // Also remove from completed if it was completed
       setCompletedTasks(completedTasks.filter((ct) => ct.taskId !== taskId));
+      // Track task deletion
+      await trackTaskDeleted(currentUser?.uid, taskId);
     }
   };
 
@@ -140,6 +165,14 @@ function App() {
 
     const newCompletedTasks = [...completedTasks, newCompletedTask];
     setCompletedTasks(newCompletedTasks);
+
+    // Track task completion
+    await trackTaskCompleted(
+      currentUser?.uid,
+      followUpTask,
+      Object.keys(responses).length > 0
+    );
+
     setFollowUpTask(null);
 
     // Check for celebrations
@@ -156,10 +189,17 @@ function App() {
 
       // Show first celebration if any
       if (celebrations.length > 0) {
-        setCelebration({
+        const celebrationData = {
           type: celebrations[0].type,
           data: celebrations[0].data,
-        });
+        };
+        setCelebration(celebrationData);
+        // Track celebration shown
+        await trackCelebration(
+          currentUser?.uid,
+          celebrations[0].type,
+          celebrations[0].data
+        );
       }
     } catch (error) {
       console.error('Error checking celebrations:', error);
@@ -179,6 +219,8 @@ function App() {
 
   const handleLogout = async () => {
     try {
+      // End session before logout
+      await endSession(currentUser?.uid);
       await logout();
       setTasks([]);
       setCompletedTasks([]);
