@@ -11,13 +11,13 @@ import Button from './components/Button';
 import Login from './components/Login';
 import { useAuth } from './contexts/AuthContext';
 import {
-  loadTasks,
   saveTasks,
   getTodayData,
   saveTodayData,
   calculateStreak,
   loadDailyData,
 } from './utils/storage';
+import { subscribeToTasks } from './services/firebaseService';
 import { checkForCelebrations } from './utils/celebrations';
 import {
   startSession,
@@ -41,6 +41,7 @@ function App() {
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Load tasks and completed tasks on mount or when user changes
   useEffect(() => {
@@ -54,47 +55,55 @@ function App() {
         // Start session and track login
         await startSession(currentUser.uid);
 
-        const loadedTasks = await loadTasks(currentUser.uid);
         const todayData = await getTodayData(currentUser.uid);
-        setTasks(loadedTasks);
         setCompletedTasks(todayData.completed || []);
 
         // Calculate streaks
         const calculatedStreaks = await calculateStreak(currentUser.uid);
         setStreaks(calculatedStreaks);
+
+        setLoading(false);
       } catch (error) {
         console.error('Error loading data:', error);
-      } finally {
         setLoading(false);
       }
     };
 
     loadData();
 
-    // Setup cleanup for session on component unmount
+    // Subscribe to real-time task updates
+    const unsubscribe = subscribeToTasks(currentUser.uid, (updatedTasks) => {
+      setIsSyncing(true);
+      setTasks(updatedTasks);
+      // Reset syncing flag after state update
+      setTimeout(() => setIsSyncing(false), 0);
+    });
+
+    // Setup cleanup for session and subscription on component unmount
     return () => {
       if (currentUser) {
         endSession(currentUser.uid);
       }
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [currentUser]);
 
-  // Save tasks whenever they change
+  // Save tasks whenever they change (but not when syncing from Firestore)
   useEffect(() => {
-    if (!currentUser || loading) return;
+    if (!currentUser || loading || isSyncing) return;
 
     const saveData = async () => {
       try {
-        if (tasks.length >= 0) {
-          await saveTasks(tasks, currentUser.uid);
-        }
+        await saveTasks(tasks, currentUser.uid);
       } catch (error) {
         console.error('Error saving tasks:', error);
       }
     };
 
     saveData();
-  }, [tasks, currentUser, loading]);
+  }, [tasks, currentUser, loading, isSyncing]);
 
   // Save completed tasks whenever they change
   useEffect(() => {
